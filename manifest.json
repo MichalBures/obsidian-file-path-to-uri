@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.1",
-	"minAppVersion": "0.9.12",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md/about",
+	"id": "obsidian-file-path-to-uri",
+	"name": "File path to URI",
+	"version": "1.0.0",
+	"minAppVersion": "0.10.7",
+	"description": "Convert file path to uri for easier use of links to local files outside of Obsidian",
+	"author": "Michal Bureš",
+	"authorUrl": "https://github.com/MichalBures",
 	"isDesktopOnly": false
 }

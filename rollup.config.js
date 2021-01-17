@@ -5,7 +5,7 @@ import commonjs from '@rollup/plugin-commonjs';
 export default {
   input: 'main.ts',
   output: {
-    dir: '.',
+    dir: './build',
     sourcemap: 'inline',
     format: 'cjs',
     exports: 'default'
@@ -14,6 +14,8 @@ export default {
   plugins: [
     typescript(),
     nodeResolve({browser: true}),
-    commonjs(),
+    commonjs({
+	    include: "node_modules/**",
+    }),
   ]
 };

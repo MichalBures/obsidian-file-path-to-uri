@@ -1,112 +1,75 @@
-import { App, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { Plugin, MarkdownView } from 'obsidian';
+import fileUriToPath from 'file-uri-to-path';
 
-interface MyPluginSettings {
-	mySetting: string;
-}
-
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
-}
-
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
-
+export default class FilePathToUri extends Plugin {
 	async onload() {
-		console.log('loading plugin');
-
-		await this.loadSettings();
-
-		this.addRibbonIcon('dice', 'Sample Plugin', () => {
-			new Notice('This is a notice!');
-		});
-
-		this.addStatusBarItem().setText('Status Bar Text');
+		console.log('Loading plugin FilePathToUri...');
 
 		this.addCommand({
-			id: 'open-sample-modal',
-			name: 'Open Sample Modal',
-			// callback: () => {
-			// 	console.log('Simple Callback');
-			// },
+			id: 'toggle-file-path-to-uri',
+			name: 'Toggle selected file path to URI and back',
 			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf) {
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-					return true;
+				if (this.getEditor() === null) {
+					return;
 				}
-				return false;
+
+				if (!checking) {
+					this.toggleLink();
+				}
+
+				return true;
+			},
+			hotkeys: [
+				{
+					modifiers: ['Mod', 'Alt'],
+					key: 'L',
+				},
+			],
+		});
+	}
+
+	getEditor() {
+		const view = this.app.workspace.getActiveViewOfType(MarkdownView)
+		if (!view || view.getMode() !== 'source') {
+			return null
+		}
+		
+		return view.sourceMode.cmEditor;
+	}
+
+	toggleLink() {
+		let editor = this.getEditor();
+		if (editor == null || !editor.somethingSelected()) {
+			return;
+		}
+
+		// Does it have any '\' or '/'?
+		const regexHasAnySlash = /.*([\\\/]).*/g;
+
+		let selectedText = editor.getSelection();
+
+		if (selectedText.startsWith('file://')) {
+			let url = fileUriToPath(selectedText);
+			if (url) {
+				editor.replaceSelection(url, 'around');
 			}
-		});
+		} else {
+			let matches = selectedText.match(regexHasAnySlash);
+			if (!matches) {
+				return;
+			}
 
-		this.addSettingTab(new SampleSettingTab(this.app, this));
-
-		this.registerCodeMirror((cm: CodeMirror.Editor) => {
-			console.log('codemirror', cm);
-		});
-
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+			// URL throws error on invalid url
+			try {
+				let url = new URL('file://' + selectedText);
+				editor.replaceSelection(url.href, 'around');
+			} catch (e) {
+				return;
+			}
+		}
 	}
 
 	onunload() {
-		console.log('unloading plugin');
-	}
-
-	async loadSettings() {
-		this.settings = Object.assign(DEFAULT_SETTINGS, await this.loadData());
-	}
-
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
-}
-
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		let {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		let {contentEl} = this;
-		contentEl.empty();
-	}
-}
-
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
-
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		let {containerEl} = this;
-
-		containerEl.empty();
-
-		containerEl.createEl('h2', {text: 'Settings for my awesome plugin.'});
-
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue('')
-				.onChange(async (value) => {
-					console.log('Secret: ' + value);
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
+		console.log('Unloading plugin FilePathToUri...');
 	}
 }

@@ -1,45 +1,30 @@
-## Obsidian Sample Plugin
+# File path to URI (an Obsidian.md plugin)
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/MichalBures/obsidian-file-path-to-uri)](https://github.com/MichalBures/obsidian-file-path-to-uri/releases/latest)
+[![GitHub All Releases](https://img.shields.io/github/downloads/MichalBures/obsidian-file-path-to-uri/total)](https://github.com/MichalBures/obsidian-file-path-to-uri/releases)
 
-This project uses Typescript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in Typescript Definition format, which contains TSDoc comments describing what it does.
+This plugin lets you convert a local path to a file url link that can be used to link to files or folders that are located outside of your Obsidian vault.
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+![demo](https://raw.githubusercontent.com/MichalBures/obsidian-file-path-to-uri/master/demo.gif)
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Changes the default font color to red using `styles.css`.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## How to use this plugin
+
+1. Select the whole path you want to convert.
+2. Use the hotkey `Ctrl/Cmd + Alt + L` or press `Ctrl/Cmd + P` to open the command palette and search for `File path to URI: Toggle selected file path to URI and back`.
+3. The selected path will toggle between file path and file url.
+
+## Roadmap
+
+- **Add option to select custom hotkeys**
+  
+    I admit I haven't look very hard, but I don't think there is an easy way to add this right now without coding the whole thing by myself. When Obsidian adds hotkey chooser to their settings I'll happily use it. 
+
+# Version History
+
+## 1.0.0 (2021-01-17)
+- Initial release
 
 
-### Releasing new releases
+## Credits
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments.
-- Publish the release.
-
-### Adding your plugin to the community plugin list
-
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-### How to use
-
-- Clone this repo.
-- `npm i` or `yarn` to install dependencies
-- `npm run dev` to start compilation in watch mode.
-
-### Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-### API Documentation
-
-See https://github.com/obsidianmd/obsidian-api
+Code and readme inspired by [https://github.com/agathauy/wikilinks-to-mdlinks-obsidian](https://github.com/agathauy/wikilinks-to-mdlinks-obsidian)
