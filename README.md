@@ -13,6 +13,30 @@ This plugin lets you convert a local path to a file url link that can be used to
 2. Use the hotkey `Ctrl/Cmd + Alt + L` or press `Ctrl/Cmd + P` to open the command palette and search for `File path to URI: Toggle selected file path to URI and back`.
 3. The selected path will toggle between file path and file url.
 
+## How to change the hotkey (in a hacky way)
+
+In the root folder of your Obsidian vault there is an `.obsidian` folder. Open it and go to the plugin folder `.obsidian\plugins\obsidian-file-path-to-uri\`.
+
+Now open the `main.js` file and search for `hotkeys`.
+
+You should see something like this:
+
+```js
+hotkeys: [
+    {
+        modifiers: ['Mod', 'Alt'],
+        key: 'L',
+    },
+],
+```
+
+Here you can change the hotkey combination to whatever fits your needs better.
+
+Save the file after you're done and restart Obsidian.
+
+**Keep in mind that you will need to do this every time this plugin has been updated**
+
+
 ## Roadmap
 
 - **Add option to select custom hotkeys**
