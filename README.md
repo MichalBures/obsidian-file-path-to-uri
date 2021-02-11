@@ -19,12 +19,22 @@ You can change the hotkey combination in Obsidian settings under Hotkeys. Look f
 
 ![hotkeys](https://raw.githubusercontent.com/MichalBures/obsidian-file-path-to-uri/master/hotkeys.png)
 
+## Transforms
+
+- `C:\Users\Obsidian\Documents` <-> `file:///C://Users//Obsidian//Documents`
+- `\\network\folder\` <-> `file:///%5C%5Cnetwork/folder/`
+- ` "C:\Users\Obsidian\Documents" ` -> `file:///C://Users//Obsidian//Documents`
+  
+    Strips the surrounding whitespace and double quotation marks from the selection
 
 # Version History
 
 ## 1.0.0 (2021-01-17)
 - Initial release
 
+## 1.1.0 (2021-02-11)
+
+- Add support for network paths and trim whitespace and quotation marks from selection
 
 ## Credits
 
