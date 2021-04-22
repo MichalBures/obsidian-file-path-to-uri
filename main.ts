@@ -1,4 +1,5 @@
 import { Plugin, MarkdownView } from 'obsidian';
+import { clipboard } from 'electron';
 import fileUriToPath from 'file-uri-to-path';
 
 export default class FilePathToUri extends Plugin {
@@ -26,6 +27,28 @@ export default class FilePathToUri extends Plugin {
 				},
 			],
 		});
+
+		this.addCommand({
+			id: 'paste-file-path-as-file-uri',
+			name: 'Paste file path as file uri',
+			checkCallback: (checking: boolean) => {
+				if (this.getEditor() === null) {
+					return;
+				}
+
+				if (!checking) {
+					this.pasteAsUri();
+				}
+
+				return true;
+			},
+			hotkeys: [
+				{
+					modifiers: ['Mod', 'Alt', 'Shift'],
+					key: 'L',
+				},
+			],
+		});
 	}
 
 	getEditor() {
@@ -37,63 +60,37 @@ export default class FilePathToUri extends Plugin {
 		return view.sourceMode.cmEditor;
 	}
 
-	toggleLink() {
+	pasteAsUri() {
 		let editor = this.getEditor();
-		if (editor == null || !editor.somethingSelected()) {
+		if (editor == null) {
 			return;
 		}
 
-		// Does it have any '\' or '/'?
-		const regexHasAnySlash = /.*([\\\/]).*/g;
-
-		let selectedText = editor.getSelection();
-		selectedText = selectedText.trim();
-		
-		// Remove surrounding "s
-		if (selectedText.startsWith('"')) {
-			selectedText = selectedText.substr(1);
-		}
-		if (selectedText.endsWith('"')) {
-			selectedText = selectedText.substr(0, selectedText.length - 1);
+		let clipboardText = clipboard.readText('clipboard');
+		if (!clipboardText) {
+			return;
 		}
 
-		// file url for network location file://\\location
-		// Works for both 'file:///\\path' and 'file:///%5C%5Cpath'
-		// Obsidian uses escape chars in link so `file:///\\location` will try to open `file:///\location instead
-		// But the selected text we get contains the full string, thus the test for both 2 and 4 '\' chars
-		if (selectedText.startsWith('file:///\\\\') || selectedText.startsWith('file:///\\\\\\\\') || selectedText.startsWith('file:///%5C%5C')) {
-			// normalize to 'file:///'
-			selectedText = selectedText.replace('file:///\\\\\\\\', 'file:///')
-			selectedText = selectedText.replace('file:///\\\\', 'file:///')
-			selectedText = selectedText.replace('file:///%5C%5C', 'file:///')
-			
-			let url = fileUriToPath(selectedText);
-			
-			if (url) {
-				// fileUriToPath returns only single leading '\' so we need to add the second one
-				editor.replaceSelection('\\'+url, 'around');
-			}
+		clipboardText = this.cleanupText(clipboardText);
+
+		// Paste the text as usual if it's not file path
+		if (clipboardText.startsWith('file:') || !this.hasSlashes(clipboardText)) {
+			editor.replaceSelection(clipboardText, 'around');
 		}
-		// file link file:///C:/Users
-		else if (selectedText.startsWith('file:///')) {
-			let url = fileUriToPath(selectedText);
-			
-			if (url) {
-				editor.replaceSelection(url, 'around');
-			}
-		}
+
 		// network path '\\path'
-		else if (selectedText.startsWith('\\\\')) {
-			let endsWithSlash = selectedText.endsWith('\\') || selectedText.endsWith('/')
+		if (clipboardText.startsWith('\\\\')) {
+			let endsWithSlash =
+				clipboardText.endsWith('\\') || clipboardText.endsWith('/');
 			// URL throws error on invalid url
 			try {
-				let url = new URL(selectedText);
-				
+				let url = new URL(clipboardText);
+
 				let link = url.href.replace('file://', 'file:///%5C%5C');
 				if (link.endsWith('/') && !endsWithSlash) {
 					link = link.slice(0, -1);
 				}
-				
+
 				editor.replaceSelection(link, 'around');
 			} catch (e) {
 				return;
@@ -101,8 +98,115 @@ export default class FilePathToUri extends Plugin {
 		}
 		// path C:\Users\ or \System\etc
 		else {
-			let matches = selectedText.match(regexHasAnySlash);
-			if (!matches) {
+			if (!this.hasSlashes(clipboardText)) {
+				return;
+			}
+
+			// URL throws error on invalid url
+			try {
+				let url = new URL('file://' + clipboardText);
+				editor.replaceSelection(url.href, 'around');
+			} catch (e) {
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Does the text have any '\' or '/'?
+	 */
+	hasSlashes(text: string) {
+		// Does it have any '\' or '/'?
+		const regexHasAnySlash = /.*([\\\/]).*/g;
+
+		if (typeof text !== 'string') {
+			return false;
+		}
+
+		let matches = text.match(regexHasAnySlash);
+		return !!matches;
+	}
+
+	/**
+	 * Trim whitespace and remove surrounding "
+	 */
+	cleanupText(text: string) {
+		if (typeof text !== 'string') {
+			return '';
+		}
+
+		text = text.trim();
+
+		// Remove surrounding "
+		if (text.startsWith('"')) {
+			text = text.substr(1);
+		}
+		if (text.endsWith('"')) {
+			text = text.substr(0, text.length - 1);
+		}
+
+		return text;
+	}
+
+	toggleLink() {
+		let editor = this.getEditor();
+		if (editor == null || !editor.somethingSelected()) {
+			return;
+		}
+
+		let selectedText = editor.getSelection();
+		selectedText = this.cleanupText(selectedText);
+
+		// file url for network location file://\\location
+		// Works for both 'file:///\\path' and 'file:///%5C%5Cpath'
+		// Obsidian uses escape chars in link so `file:///\\location` will try to open `file:///\location instead
+		// But the selected text we get contains the full string, thus the test for both 2 and 4 '\' chars
+		if (
+			selectedText.startsWith('file:///\\\\') ||
+			selectedText.startsWith('file:///\\\\\\\\') ||
+			selectedText.startsWith('file:///%5C%5C')
+		) {
+			// normalize to 'file:///'
+			selectedText = selectedText.replace('file:///\\\\\\\\', 'file:///');
+			selectedText = selectedText.replace('file:///\\\\', 'file:///');
+			selectedText = selectedText.replace('file:///%5C%5C', 'file:///');
+
+			let url = fileUriToPath(selectedText);
+
+			if (url) {
+				// fileUriToPath returns only single leading '\' so we need to add the second one
+				editor.replaceSelection('\\' + url, 'around');
+			}
+		}
+		// file link file:///C:/Users
+		else if (selectedText.startsWith('file:///')) {
+			let url = fileUriToPath(selectedText);
+
+			if (url) {
+				editor.replaceSelection(url, 'around');
+			}
+		}
+		// network path '\\path'
+		else if (selectedText.startsWith('\\\\')) {
+			let endsWithSlash =
+				selectedText.endsWith('\\') || selectedText.endsWith('/');
+			// URL throws error on invalid url
+			try {
+				let url = new URL(selectedText);
+
+				let link = url.href.replace('file://', 'file:///%5C%5C');
+				if (link.endsWith('/') && !endsWithSlash) {
+					link = link.slice(0, -1);
+				}
+
+				editor.replaceSelection(link, 'around');
+			} catch (e) {
+				return;
+			}
+		}
+		// path C:\Users\ or \System\etc
+		else {
+			if (!this.hasSlashes(selectedText)) {
 				return;
 			}
 
