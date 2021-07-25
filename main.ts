@@ -49,6 +49,32 @@ export default class FilePathToUri extends Plugin {
 				},
 			],
 		});
+
+
+		this.addCommand({
+			id: 'paste-file-path-as-file-uri-link',
+			name: 'Paste file path as file uri link',
+			checkCallback: (checking: boolean) => {
+				if (this.getEditor() === null)
+				{
+					return;
+				}
+
+				if (!checking)
+				{
+					this.pasteAsUriLink();
+				}
+
+				return true;
+			},
+			hotkeys: [
+				// For testing only
+				// {
+				// 	modifiers: ['Mod', 'Alt', 'Shift'],
+				// 	key: 'J',
+				// },
+			],
+		})
 	}
 
 	getEditor() {
@@ -111,6 +137,78 @@ export default class FilePathToUri extends Plugin {
 			}
 		}
 	}
+
+	makeLink(title:string, link:string) {
+		return `[${title}](${link})`
+	}
+
+	// TODO: todo
+	pasteAsUriLink()
+	{
+		let editor = this.getEditor();
+		if (editor == null)
+		{
+			return;
+		}
+
+		let clipboardText = clipboard.readText('clipboard');
+		if (!clipboardText)
+		{
+			return;
+		}
+
+		clipboardText = this.cleanupText(clipboardText);
+
+		// Paste the text as usual if it's not file path
+		if (clipboardText.startsWith('file:') || !this.hasSlashes(clipboardText))
+		{
+			editor.replaceSelection(clipboardText, 'around');
+		}
+
+		// network path '\\path'
+		if (clipboardText.startsWith('\\\\'))
+		{
+			let endsWithSlash =
+				clipboardText.endsWith('\\') || clipboardText.endsWith('/');
+			// URL throws error on invalid url
+			try
+			{
+				let url = new URL(clipboardText);
+
+				let link = url.href.replace('file://', 'file:///%5C%5C');
+				if (link.endsWith('/') && !endsWithSlash)
+				{
+					link = link.slice(0, -1);
+				}
+
+				// Needs to add two '\\' (that is '\\\\' in code because of escaping) in order for the link title
+				// to display two '\\' in preview mode
+				editor.replaceSelection(this.makeLink('\\\\' + clipboardText, link), 'around');
+			} catch (e)
+			{
+				return;
+			}
+		}
+		// path C:\Users\ or \System\etc
+		else
+		{
+			if (!this.hasSlashes(clipboardText))
+			{
+				return;
+			}
+
+			// URL throws error on invalid url
+			try
+			{
+				let url = new URL('file://' + clipboardText);
+				editor.replaceSelection(this.makeLink(clipboardText, url.href), 'around');
+			} catch (e)
+			{
+				return;
+			}
+		}
+	}
+
 
 	/**
 	 * Does the text have any '\' or '/'?
