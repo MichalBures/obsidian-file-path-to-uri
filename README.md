@@ -7,6 +7,11 @@ This plugin lets you convert a local path to a file url link that can be used to
 
 ![demo](https://raw.githubusercontent.com/MichalBures/obsidian-file-path-to-uri/master/demo.gif)
 
+## Use Obsidian's native behaviour ❗
+**AFAIK this plugin isn't really needed anymore** since you can drag any file or folder into your note while holding `Ctrl` and Obsidian will paste it as a link.
+
+`C:\Users\Obsidian\Documents` will be pasted as `[Documents](file:///C:%5CUsers%5CObsidian%5CDocuments)`
+
 ## How to use this plugin
 
 ### Convert written path
