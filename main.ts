@@ -201,7 +201,7 @@ export default class FilePathToUri extends Plugin {
 			try
 			{
 				let url = new URL('file://' + clipboardText);
-				let trunc_url = /[^/]*$/.exec(clipboardText)[0];
+				let trunc_url = /[^/]*$/.exec(clipboardText)[0]; // https://stackoverflow.com/questions/8376525/get-value-of-a-string-after-last-slash-in-javascript
 				editor.replaceSelection(this.makeLink(trunc_url, url.href), 'around');
 			} catch (e)
 			{
