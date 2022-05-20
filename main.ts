@@ -201,7 +201,8 @@ export default class FilePathToUri extends Plugin {
 			try
 			{
 				let url = new URL('file://' + clipboardText);
-				editor.replaceSelection(this.makeLink(clipboardText, url.href), 'around');
+				let trunc_url = /[^/]*$/.exec(clipboardText)[0];
+				editor.replaceSelection(this.makeLink(trunc_url, url.href), 'around');
 			} catch (e)
 			{
 				return;
