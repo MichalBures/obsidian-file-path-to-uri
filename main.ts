@@ -67,6 +67,25 @@ export default class FilePathToUri extends Plugin {
 
 				return true;
 			},
+			hotkeys: [],
+		})
+
+		this.addCommand({
+			id: 'paste-file-path-as-file-uri-link-name-only',
+			name: 'Paste file path as file uri link - Name only',
+			checkCallback: (checking: boolean) => {
+				if (this.getEditor() === null)
+				{
+					return;
+				}
+
+				if (!checking)
+				{
+					this.pasteAsUriLink('lastSegment');
+				}
+
+				return true;
+			},
 			hotkeys: [
 				// For testing only
 				// {
@@ -75,6 +94,7 @@ export default class FilePathToUri extends Plugin {
 				// },
 			],
 		})
+
 	}
 
 	getEditor() {
@@ -143,7 +163,7 @@ export default class FilePathToUri extends Plugin {
 	}
 
 	// TODO: todo
-	pasteAsUriLink()
+	pasteAsUriLink(pasteType?:string)
 	{
 		let editor = this.getEditor();
 		if (editor == null)
@@ -181,9 +201,21 @@ export default class FilePathToUri extends Plugin {
 					link = link.slice(0, -1);
 				}
 
-				// Needs to add two '\\' (that is '\\\\' in code because of escaping) in order for the link title
-				// to display two '\\' in preview mode
-				editor.replaceSelection(this.makeLink('\\\\' + clipboardText, link), 'around');
+				// https://stackoverflow.com/questions/8376525/get-value-of-a-string-after-last-slash-in-javascript
+				// Need to use url.href cause it normalizes the slash type (\/)
+				// Handles trailing slash
+				let lastUrlSegment = /[^/]*$/.exec(url.href.endsWith('/') ? url.href.slice(0, -1) : url.href)[0];
+				
+
+				if (pasteType === 'lastSegment')
+				{
+					editor.replaceSelection(this.makeLink(lastUrlSegment, link), 'around');
+				} else
+				{
+					// Needs to add two '\\' (that is '\\\\' in code because of escaping) in order for the link title
+					// to display two '\\' in preview mode
+					editor.replaceSelection(this.makeLink('\\\\' + clipboardText, link), 'around');
+				}
 			} catch (e)
 			{
 				return;
@@ -201,7 +233,18 @@ export default class FilePathToUri extends Plugin {
 			try
 			{
 				let url = new URL('file://' + clipboardText);
-				editor.replaceSelection(this.makeLink(clipboardText, url.href), 'around');
+				
+				// https://stackoverflow.com/questions/8376525/get-value-of-a-string-after-last-slash-in-javascript
+				// Need to use url.href cause it normalizes the slash type (\/)
+				// Handles trailing slash
+				let lastUrlSegment = /[^/]*$/.exec(url.href.endsWith('/') ? url.href.slice(0, -1) : url.href)[0];
+				
+				// Ugly, but quick solution
+				if (pasteType === 'lastSegment') {
+					editor.replaceSelection(this.makeLink(lastUrlSegment, url.href), 'around');
+				} else {
+					editor.replaceSelection(this.makeLink(clipboardText, url.href), 'around');
+				}
 			} catch (e)
 			{
 				return;
