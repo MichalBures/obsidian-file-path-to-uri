@@ -159,7 +159,7 @@ export default class FilePathToUri extends Plugin {
 	}
 
 	makeLink(title:string, link:string) {
-		return `[${title}](${link})`
+		return `[${title.replace(new RegExp('%20', 'g'), ' ')}](${link})`
 	}
 
 	// TODO: todo

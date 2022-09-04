@@ -77,6 +77,10 @@ You can change the hotkey combination in Obsidian settings under Hotkeys. Look f
 
 - Add another command that pastes converted file path from clipboard as file uri link but the link title is only the file/folder name
 
+## 1.4.1 (2022-09-04)
+
+- Fix '%20' instead of spaces in file/folder names only links
+
 ## Credits
 
 Code and readme inspired by [https://github.com/agathauy/wikilinks-to-mdlinks-obsidian](https://github.com/agathauy/wikilinks-to-mdlinks-obsidian)
