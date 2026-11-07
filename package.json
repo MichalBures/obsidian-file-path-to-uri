@@ -4,8 +4,8 @@
   "description": "This is a sample plugin for Obsidian (https://obsidian.md)",
   "main": "main.js",
   "scripts": {
-    "dev": "rollup --config rollup.config.js -w",
-    "build": "rollup --config rollup.config.js"
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +16,7 @@
     "@rollup/plugin-typescript": "^6.0.0",
     "@types/electron": "^1.6.10",
     "@types/node": "^14.14.2",
+    "esbuild": "^0.28.2",
     "obsidian": "https://github.com/obsidianmd/obsidian-api/tarball/master",
     "prettier": "^2.2.1",
     "rollup": "^2.32.1",
