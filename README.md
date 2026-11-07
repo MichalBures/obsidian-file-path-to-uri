@@ -81,6 +81,12 @@ You can change the hotkey combination in Obsidian settings under Hotkeys. Look f
 
 - Fix '%20' instead of spaces in file/folder names only links
 
+## 1.5.0 (2026-11-07)
+
+Fixed a plugin loading error on Obsidian 1.15.
+
+Thanks (or blame if it doesn't work) to @superle3 for the fix.
+
 ## Credits
 
 Code and readme inspired by [https://github.com/agathauy/wikilinks-to-mdlinks-obsidian](https://github.com/agathauy/wikilinks-to-mdlinks-obsidian)
